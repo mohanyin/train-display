@@ -1,4 +1,4 @@
-dist/
+output/
 
 # Python
 __pycache__/
