@@ -1,8 +1,9 @@
 """Draw subway time image."""
 
 import os
+from datetime import datetime
 from enum import Enum
-from typing import Tuple, TypedDict
+from typing import Dict, List, Tuple, TypedDict
 
 # pylint: disable=no-member
 # missing types because of C bindings
@@ -186,9 +187,11 @@ def draw_station(
     x: int,
     y: int,
     station: str,
+    reverseDir: str,
     line: Line,
     status: Status,
     leave: LeaveInstructions,
+    times: List[int],
 ) -> None:
     """Draw all details for a station."""
     pencil.draw_circle(ctx, x=x + 20, y=y + 28, radius=24, fill=line["background"])
@@ -225,9 +228,12 @@ def draw_station(
         font_size=16,
         color=colors.NEUTRAL_900,
     )
+    minutes_until = (
+        (times[0] - int(datetime.now().timestamp())) // 60 if len(times) > 0 else "--"
+    )
     pencil.draw_text(
         ctx,
-        text="12",
+        text=str(minutes_until),
         x=x + 104,
         y=y + 136,
         height=68,
@@ -253,18 +259,22 @@ def draw_station(
         font_size=12,
         color=colors.NEUTRAL_900,
     )
+    minutes_until_next = (
+        (times[1] - int(datetime.now().timestamp())) // 60 if len(times) > 1 else "--"
+    )
     pencil.draw_text(
         ctx,
-        text="24 min.",
+        text=str(minutes_until_next) + " min.",
         x=x + 300,
         y=y + 141,
         height=16,
         font_size=16,
         color=colors.NEUTRAL_900,
     )
+
     pencil.draw_text(
         ctx,
-        text="FLATBUSH",
+        text=reverseDir,
         x=x + 300,
         y=y + 177,
         height=16,
@@ -282,7 +292,7 @@ def draw_station(
     )
 
 
-def generate_subway_time_image() -> cairo.ImageSurface:
+def generate_subway_time_image(times: Dict[str, List[int]]) -> cairo.ImageSurface:
     """Generate a subway time image."""
     surface = cairo.ImageSurface(cairo.FORMAT_RGB24, WIDTH, HEIGHT)
     ctx = cairo.Context(surface)
@@ -296,6 +306,7 @@ def generate_subway_time_image() -> cairo.ImageSurface:
         x=0,
         y=0,
         station="WAKEFIELD - 241ST",
+        reverseDir="FLATBUSH",
         line={
             "name": "2",
             "color": colors.NEUTRAL_000,
@@ -303,12 +314,14 @@ def generate_subway_time_image() -> cairo.ImageSurface:
         },
         status=Status.OK,
         leave=LeaveInstructions.SOON,
+        times=times["2"],
     )
     draw_station(
         ctx,
         x=0,
         y=HEIGHT // 2,
         station="HARLEM - 148 ST",
+        reverseDir="NEW LOTS",
         line={
             "name": "3",
             "color": colors.NEUTRAL_000,
@@ -316,12 +329,14 @@ def generate_subway_time_image() -> cairo.ImageSurface:
         },
         status=Status.OK,
         leave=LeaveInstructions.NO_INSTRUCTIONS,
+        times=times["3"],
     )
     draw_station(
         ctx,
         x=WIDTH // 2,
         y=0,
         station="145 ST",
+        reverseDir="BRIGHTON",
         line={
             "name": "B",
             "color": colors.NEUTRAL_000,
@@ -329,12 +344,14 @@ def generate_subway_time_image() -> cairo.ImageSurface:
         },
         status=Status.OK,
         leave=LeaveInstructions.NOW,
+        times=times["B"],
     )
     draw_station(
         ctx,
         x=WIDTH // 2,
         y=HEIGHT // 2,
         station="96 ST",
+        reverseDir="CONEY ISL",
         line={
             "name": "Q",
             "color": colors.NEUTRAL_900,
@@ -342,12 +359,13 @@ def generate_subway_time_image() -> cairo.ImageSurface:
         },
         status=Status.DELAYED,
         leave=LeaveInstructions.NO_INSTRUCTIONS,
+        times=times["Q"],
     )
 
     return surface
 
 
-def create_subway_time_image(output_path: str) -> None:
+def create_subway_time_image(output_path: str, times: Dict[str, List[int]]) -> None:
     """Create a subway time image and save it to the specified path.
 
     Args:
@@ -356,5 +374,5 @@ def create_subway_time_image(output_path: str) -> None:
     # Create output directory if it doesn't exist
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    surface = generate_subway_time_image()
+    surface = generate_subway_time_image(times)
     surface.write_to_png(output_path)

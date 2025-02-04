@@ -12,11 +12,10 @@ def main() -> None:
         print("Usage: python main.py <output_path>")
         sys.exit(1)
 
-    feed = fetch_subway_times()
-    print(feed)
+    times = fetch_subway_times()
 
     output_path = sys.argv[1]
-    draw.create_subway_time_image(output_path)
+    draw.create_subway_time_image(output_path, times)
     print(f"Subway time image saved to: {output_path}")
 
 
