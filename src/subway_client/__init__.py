@@ -44,10 +44,11 @@ def get_subway_data_for_stop(
 
 def fetch_subway_times() -> Dict[str, List[int]]:
     """Fetch subway times for all stops."""
+    data_123 = fetch_subway_data(FEED_123)
     times = {
         "B": get_subway_data_for_stop(fetch_subway_data(FEED_BDFM), "D25N", "B"),
         "Q": get_subway_data_for_stop(fetch_subway_data(FEED_NQRW), "D25N", "Q"),
-        "2": get_subway_data_for_stop(fetch_subway_data(FEED_123), "237N", "2"),
-        "3": get_subway_data_for_stop(fetch_subway_data(FEED_123), "237N", "3"),
+        "2": get_subway_data_for_stop(data_123, "237N", "2"),
+        "3": get_subway_data_for_stop(data_123, "237N", "3"),
     }
     return times
