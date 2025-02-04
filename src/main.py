@@ -3,6 +3,7 @@
 import sys
 
 import draw
+from subway_client import fetch_subway_times
 
 
 def main() -> None:
@@ -10,6 +11,9 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python main.py <output_path>")
         sys.exit(1)
+
+    feed = fetch_subway_times()
+    print(feed)
 
     output_path = sys.argv[1]
     draw.create_subway_time_image(output_path)
