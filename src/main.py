@@ -3,7 +3,7 @@
 import sys
 
 import draw
-from subway_client import fetch_subway_times
+from subway_client import fetch_status_data, fetch_subway_times
 
 
 def main() -> None:
@@ -13,9 +13,10 @@ def main() -> None:
         sys.exit(1)
 
     times = fetch_subway_times()
+    alerts = fetch_status_data()
 
     output_path = sys.argv[1]
-    draw.create_subway_time_image(output_path, times)
+    draw.create_subway_time_image(output_path, times, alerts)
     print(f"Subway time image saved to: {output_path}")
 
 

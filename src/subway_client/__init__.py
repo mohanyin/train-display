@@ -11,6 +11,39 @@ FEED_NQRW = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-
 FEED_BDFM = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
 FEED_123 = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"
 
+STATUS_URL = (
+    "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/camsys%2Fsubway-alerts.json"
+)
+
+
+def find_alert_for_line(line: str, alerts: Dict) -> Dict | None:
+    """Find the alert for a given line."""
+    for alert in alerts:
+        entities = alert["alert"]["informed_entity"]
+        for entity in entities:
+            now = int(datetime.now().timestamp())
+            active_period = alert["alert"].get("active_period", [None])[0]
+            if entity.get("route_id") == line and entity.get("agency_id") == "MTASBWY":
+                if active_period is None or (
+                    active_period.get("start", 0)
+                    <= now
+                    <= active_period.get("end", float("inf"))
+                ):
+                    return alert["alert"]
+    return None
+
+
+def fetch_status_data() -> Dict:
+    """Fetch status data from the MTA API."""
+    response = requests.get(STATUS_URL, timeout=10).json()
+    alerts = response["entity"]
+    return {
+        "2": find_alert_for_line("2", alerts),
+        "3": find_alert_for_line("3", alerts),
+        "B": find_alert_for_line("B", alerts),
+        "Q": find_alert_for_line("Q", alerts),
+    }
+
 
 def fetch_subway_data(feed_url: str) -> gtfs_realtime_pb2.FeedMessage:
     """Fetch subway data from the MTA API."""

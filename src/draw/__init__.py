@@ -314,7 +314,7 @@ def draw_station(
 
 
 def generate_subway_time_image(
-    times: Dict[str, Dict[str, List[int]]]
+    times: Dict[str, Dict[str, List[int]]], alerts: Dict
 ) -> cairo.ImageSurface:
     """Generate a subway time image."""
     surface = cairo.ImageSurface(cairo.FORMAT_RGB24, WIDTH, HEIGHT)
@@ -335,7 +335,7 @@ def generate_subway_time_image(
             "color": colors.NEUTRAL_000,
             "background": colors.SUBWAY_RED,
         },
-        status=Status.OK,
+        status=Status.OK if alerts["2"] is None else Status.DELAYED,
         times={
             "N": times["N"]["2"],
             "S": times["S"]["2"],
@@ -353,7 +353,7 @@ def generate_subway_time_image(
             "color": colors.NEUTRAL_000,
             "background": colors.SUBWAY_RED,
         },
-        status=Status.OK,
+        status=Status.OK if alerts["3"] is None else Status.DELAYED,
         times={
             "N": times["N"]["3"],
             "S": times["S"]["3"],
@@ -371,7 +371,7 @@ def generate_subway_time_image(
             "color": colors.NEUTRAL_000,
             "background": colors.SUBWAY_ORANGE,
         },
-        status=Status.OK,
+        status=Status.OK if alerts["B"] is None else Status.DELAYED,
         times={
             "N": times["N"]["B"],
             "S": times["S"]["B"],
@@ -389,7 +389,7 @@ def generate_subway_time_image(
             "color": colors.NEUTRAL_900,
             "background": colors.SUBWAY_YELLOW,
         },
-        status=Status.DELAYED,
+        status=Status.OK if alerts["Q"] is None else Status.DELAYED,
         times={
             "N": times["N"]["Q"],
             "S": times["S"]["Q"],
@@ -401,7 +401,7 @@ def generate_subway_time_image(
 
 
 def create_subway_time_image(
-    output_path: str, times: Dict[str, Dict[str, List[int]]]
+    output_path: str, times: Dict[str, Dict[str, List[int]]], alerts: Dict
 ) -> None:
     """Create a subway time image and save it to the specified path.
 
@@ -411,5 +411,5 @@ def create_subway_time_image(
     # Create output directory if it doesn't exist
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    surface = generate_subway_time_image(times)
+    surface = generate_subway_time_image(times, alerts)
     surface.write_to_png(output_path)
