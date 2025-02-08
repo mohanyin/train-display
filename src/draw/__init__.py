@@ -180,6 +180,20 @@ def draw_leave_instructions(
         )
 
 
+def timestamp_to_minutes(timestamp: int) -> int:
+    """Convert a timestamp to minutes until the time."""
+    return (timestamp - int(datetime.now().timestamp())) // 60
+
+
+def find_next_train_times(times: List[int], min_minutes: int) -> List[int] | None:
+    """Find the next train times."""
+    now = int(datetime.now().timestamp())
+    for i, time in enumerate(times):
+        if time > now + min_minutes * 60:
+            return [timestamp_to_minutes(time), timestamp_to_minutes(times[i + 1])]
+    return None
+
+
 # pylint: disable=too-many-arguments
 def draw_station(
     ctx: cairo.Context,
@@ -190,10 +204,13 @@ def draw_station(
     reverseDir: str,
     line: Line,
     status: Status,
-    leave: LeaveInstructions,
     times: Dict[str, List[int]],
+    walk_time: int,
 ) -> None:
     """Draw all details for a station."""
+    train_times = find_next_train_times(times["N"], walk_time)
+    reverse_train_times = find_next_train_times(times["S"], walk_time)
+
     pencil.draw_circle(ctx, x=x + 20, y=y + 28, radius=24, fill=line["background"])
     pencil.draw_text(
         ctx,
@@ -207,7 +224,12 @@ def draw_station(
         center=True,
     )
 
-    draw_leave_instructions(ctx, x=x, y=y, leave=leave)
+    if train_times is not None and train_times[0] < walk_time + 2:
+        draw_leave_instructions(ctx, x=x, y=y, leave=LeaveInstructions.NOW)
+    elif train_times is not None and train_times[0] < walk_time + 5:
+        draw_leave_instructions(ctx, x=x, y=y, leave=LeaveInstructions.SOON)
+    else:
+        draw_leave_instructions(ctx, x=x, y=y, leave=LeaveInstructions.NO_INSTRUCTIONS)
     draw_station_status(ctx, x=x, y=y, status=status)
 
     pencil.draw_rounded_rectangle(
@@ -228,11 +250,7 @@ def draw_station(
         font_size=16,
         color=colors.NEUTRAL_900,
     )
-    minutes_until = (
-        (times["N"][0] - int(datetime.now().timestamp())) // 60
-        if len(times["N"]) > 0
-        else "--"
-    )
+    minutes_until = train_times[0] if train_times is not None else "--"
     pencil.draw_text(
         ctx,
         text=str(minutes_until),
@@ -261,11 +279,7 @@ def draw_station(
         font_size=12,
         color=colors.NEUTRAL_900,
     )
-    minutes_until_next = (
-        (times["N"][1] - int(datetime.now().timestamp())) // 60
-        if len(times["N"]) > 1
-        else "--"
-    )
+    minutes_until_next = train_times[1] if train_times is not None else "--"
     pencil.draw_text(
         ctx,
         text=str(minutes_until_next) + " min.",
@@ -286,9 +300,7 @@ def draw_station(
         color=colors.NEUTRAL_900,
     )
     minutes_until_reverse = (
-        (times["S"][0] - int(datetime.now().timestamp())) // 60
-        if len(times["S"]) > 0
-        else "--"
+        reverse_train_times[0] if reverse_train_times is not None else "--"
     )
     pencil.draw_text(
         ctx,
@@ -324,11 +336,11 @@ def generate_subway_time_image(
             "background": colors.SUBWAY_RED,
         },
         status=Status.OK,
-        leave=LeaveInstructions.SOON,
         times={
             "N": times["N"]["2"],
             "S": times["S"]["2"],
         },
+        walk_time=10,
     )
     draw_station(
         ctx,
@@ -342,11 +354,11 @@ def generate_subway_time_image(
             "background": colors.SUBWAY_RED,
         },
         status=Status.OK,
-        leave=LeaveInstructions.NO_INSTRUCTIONS,
         times={
             "N": times["N"]["3"],
             "S": times["S"]["3"],
         },
+        walk_time=10,
     )
     draw_station(
         ctx,
@@ -360,11 +372,11 @@ def generate_subway_time_image(
             "background": colors.SUBWAY_ORANGE,
         },
         status=Status.OK,
-        leave=LeaveInstructions.NOW,
         times={
             "N": times["N"]["B"],
             "S": times["S"]["B"],
         },
+        walk_time=8,
     )
     draw_station(
         ctx,
@@ -378,11 +390,11 @@ def generate_subway_time_image(
             "background": colors.SUBWAY_YELLOW,
         },
         status=Status.DELAYED,
-        leave=LeaveInstructions.NO_INSTRUCTIONS,
         times={
             "N": times["N"]["Q"],
             "S": times["S"]["Q"],
         },
+        walk_time=8,
     )
 
     return surface
