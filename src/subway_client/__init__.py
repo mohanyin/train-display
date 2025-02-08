@@ -1,6 +1,7 @@
 # pylint: disable=import-error
 """Client for fetching subway times from the MTA API."""
 
+from datetime import datetime
 from typing import Dict, List
 
 import requests
@@ -32,23 +33,35 @@ def get_subway_data_for_stop(
             and entity.trip_update.trip.route_id == route_id
         ):
             for stop_time_update in entity.trip_update.stop_time_update:
+                departure_time = stop_time_update.departure.time
                 if (
                     stop_time_update.stop_id == stop_id
                     and entity.trip_update.trip.route_id == route_id
+                    and departure_time > int(datetime.now().timestamp())
                 ):
-                    departure_time = stop_time_update.departure.time
                     times.append(departure_time)
     times.sort()
     return times
 
 
-def fetch_subway_times() -> Dict[str, List[int]]:
+def fetch_subway_times() -> Dict[str, Dict[str, List[int]]]:
     """Fetch subway times for all stops."""
     data_123 = fetch_subway_data(FEED_123)
+    data_bdfm = fetch_subway_data(FEED_BDFM)
+    data_nqrw = fetch_subway_data(FEED_NQRW)
+
     times = {
-        "B": get_subway_data_for_stop(fetch_subway_data(FEED_BDFM), "D25N", "B"),
-        "Q": get_subway_data_for_stop(fetch_subway_data(FEED_NQRW), "D25N", "Q"),
-        "2": get_subway_data_for_stop(data_123, "237N", "2"),
-        "3": get_subway_data_for_stop(data_123, "237N", "3"),
+        "N": {
+            "B": get_subway_data_for_stop(data_bdfm, "D25N", "B"),
+            "Q": get_subway_data_for_stop(data_nqrw, "D25N", "Q"),
+            "2": get_subway_data_for_stop(data_123, "237N", "2"),
+            "3": get_subway_data_for_stop(data_123, "237N", "3"),
+        },
+        "S": {
+            "B": get_subway_data_for_stop(data_bdfm, "D25S", "B"),
+            "Q": get_subway_data_for_stop(data_nqrw, "D25S", "Q"),
+            "2": get_subway_data_for_stop(data_123, "237S", "2"),
+            "3": get_subway_data_for_stop(data_123, "237S", "3"),
+        },
     }
     return times

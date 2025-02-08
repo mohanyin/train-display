@@ -191,7 +191,7 @@ def draw_station(
     line: Line,
     status: Status,
     leave: LeaveInstructions,
-    times: List[int],
+    times: Dict[str, List[int]],
 ) -> None:
     """Draw all details for a station."""
     pencil.draw_circle(ctx, x=x + 20, y=y + 28, radius=24, fill=line["background"])
@@ -229,7 +229,9 @@ def draw_station(
         color=colors.NEUTRAL_900,
     )
     minutes_until = (
-        (times[0] - int(datetime.now().timestamp())) // 60 if len(times) > 0 else "--"
+        (times["N"][0] - int(datetime.now().timestamp())) // 60
+        if len(times["N"]) > 0
+        else "--"
     )
     pencil.draw_text(
         ctx,
@@ -260,7 +262,9 @@ def draw_station(
         color=colors.NEUTRAL_900,
     )
     minutes_until_next = (
-        (times[1] - int(datetime.now().timestamp())) // 60 if len(times) > 1 else "--"
+        (times["N"][1] - int(datetime.now().timestamp())) // 60
+        if len(times["N"]) > 1
+        else "--"
     )
     pencil.draw_text(
         ctx,
@@ -281,9 +285,14 @@ def draw_station(
         font_size=12,
         color=colors.NEUTRAL_900,
     )
+    minutes_until_reverse = (
+        (times["S"][0] - int(datetime.now().timestamp())) // 60
+        if len(times["S"]) > 0
+        else "--"
+    )
     pencil.draw_text(
         ctx,
-        text="12 min.",
+        text=str(minutes_until_reverse) + " min.",
         x=x + 300,
         y=y + 196,
         height=16,
@@ -292,7 +301,9 @@ def draw_station(
     )
 
 
-def generate_subway_time_image(times: Dict[str, List[int]]) -> cairo.ImageSurface:
+def generate_subway_time_image(
+    times: Dict[str, Dict[str, List[int]]]
+) -> cairo.ImageSurface:
     """Generate a subway time image."""
     surface = cairo.ImageSurface(cairo.FORMAT_RGB24, WIDTH, HEIGHT)
     ctx = cairo.Context(surface)
@@ -314,7 +325,10 @@ def generate_subway_time_image(times: Dict[str, List[int]]) -> cairo.ImageSurfac
         },
         status=Status.OK,
         leave=LeaveInstructions.SOON,
-        times=times["2"],
+        times={
+            "N": times["N"]["2"],
+            "S": times["S"]["2"],
+        },
     )
     draw_station(
         ctx,
@@ -329,7 +343,10 @@ def generate_subway_time_image(times: Dict[str, List[int]]) -> cairo.ImageSurfac
         },
         status=Status.OK,
         leave=LeaveInstructions.NO_INSTRUCTIONS,
-        times=times["3"],
+        times={
+            "N": times["N"]["3"],
+            "S": times["S"]["3"],
+        },
     )
     draw_station(
         ctx,
@@ -344,7 +361,10 @@ def generate_subway_time_image(times: Dict[str, List[int]]) -> cairo.ImageSurfac
         },
         status=Status.OK,
         leave=LeaveInstructions.NOW,
-        times=times["B"],
+        times={
+            "N": times["N"]["B"],
+            "S": times["S"]["B"],
+        },
     )
     draw_station(
         ctx,
@@ -359,13 +379,18 @@ def generate_subway_time_image(times: Dict[str, List[int]]) -> cairo.ImageSurfac
         },
         status=Status.DELAYED,
         leave=LeaveInstructions.NO_INSTRUCTIONS,
-        times=times["Q"],
+        times={
+            "N": times["N"]["Q"],
+            "S": times["S"]["Q"],
+        },
     )
 
     return surface
 
 
-def create_subway_time_image(output_path: str, times: Dict[str, List[int]]) -> None:
+def create_subway_time_image(
+    output_path: str, times: Dict[str, Dict[str, List[int]]]
+) -> None:
     """Create a subway time image and save it to the specified path.
 
     Args:
