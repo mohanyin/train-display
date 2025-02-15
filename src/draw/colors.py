@@ -18,7 +18,7 @@ SUBWAY_YELLOW = hex_to_rgb("#FCCC0A")
 
 NEUTRAL_000 = hex_to_rgb("#FFFFFF")
 NEUTRAL_100 = hex_to_rgb("#F8F3EF")
-NEUTRAL_200 = hex_to_rgb("#E4DBD4")
+NEUTRAL_200 = hex_to_rgb("#ECE4DE")
 NEUTRAL_300 = hex_to_rgb("#B6A99F")
 NEUTRAL_900 = hex_to_rgb("#000000")
 

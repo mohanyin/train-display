@@ -40,58 +40,43 @@ class LeaveInstructions(Enum):
 
 def draw_station_status(ctx: cairo.Context, *, x: int, y: int, status: Status) -> None:
     """Draw the status lights of a station."""
-    if status == Status.OK:
-        pencil.draw_rounded_rectangle(
-            ctx,
-            x=x + 36,
-            y=y + 100,
-            width=16,
-            height=16,
-            radius=4,
-            fill=colors.STATUS_OK,
-        )
-        pencil.draw_rounded_rectangle(
-            ctx,
-            x=x + 36,
-            y=y + 124,
-            width=16,
-            height=16,
-            radius=4,
-            fill=colors.NEUTRAL_200,
-        )
-    else:
-        pencil.draw_rounded_rectangle(
-            ctx,
-            x=x + 36,
-            y=y + 100,
-            width=16,
-            height=16,
-            radius=4,
-            fill=colors.NEUTRAL_200,
-        )
-        pencil.draw_rounded_rectangle(
-            ctx,
-            x=x + 36,
-            y=y + 124,
-            width=16,
-            height=16,
-            radius=4,
-            fill=colors.STATUS_WARNING,
-        )
+    pencil.draw_rounded_rectangle(
+        ctx,
+        x=x + 36,
+        y=y + 88,
+        width=18,
+        height=18,
+        radius=100,
+        fill=colors.STATUS_OK if status == Status.OK else colors.NEUTRAL_300,
+    )
+    pencil.draw_rounded_rectangle(
+        ctx,
+        x=x + 36,
+        y=y + 114,
+        width=18,
+        height=18,
+        radius=100,
+        fill=colors.NEUTRAL_300 if status == Status.OK else colors.STATUS_WARNING,
+    )
 
 
 def draw_leave_instructions(
     ctx: cairo.Context, *, x: int, y: int, leave: LeaveInstructions
 ) -> None:
     """Draw the leave instructions for a station."""
+
+    box_y = y + 168
+    indicator_y = y + 176
+    text_y = y + 184
+
     pencil.draw_rounded_rectangle(
         ctx,
         x=x + 92,
-        y=y + 28,
+        y=box_y,
         width=284,
         height=48,
         radius=8,
-        stroke=colors.NEUTRAL_200,
+        fill=colors.NEUTRAL_200,
     )
 
     leave_text_color = (
@@ -103,7 +88,7 @@ def draw_leave_instructions(
         ctx,
         text="LEAVE",
         x=x + 100,
-        y=y + 44,
+        y=text_y,
         height=16,
         width=64,
         font_size=16,
@@ -115,17 +100,17 @@ def draw_leave_instructions(
         pencil.draw_rounded_rectangle(
             ctx,
             x=x + 202,
-            y=y + 36,
+            y=indicator_y,
             width=64,
             height=32,
-            radius=4,
+            radius=100,
             fill=colors.STATUS_OK,
         )
         pencil.draw_text(
             ctx,
             text="NOW",
             x=x + 202,
-            y=y + 44,
+            y=text_y,
             height=16,
             width=64,
             font_size=16,
@@ -137,7 +122,7 @@ def draw_leave_instructions(
             ctx,
             text="NOW",
             x=x + 202,
-            y=y + 44,
+            y=text_y,
             height=16,
             width=64,
             font_size=16,
@@ -149,17 +134,17 @@ def draw_leave_instructions(
         pencil.draw_rounded_rectangle(
             ctx,
             x=x + 304,
-            y=y + 36,
+            y=indicator_y,
             width=64,
             height=32,
-            radius=4,
+            radius=100,
             fill=colors.STATUS_WARNING,
         )
         pencil.draw_text(
             ctx,
             text="SOON",
             x=x + 304,
-            y=y + 44,
+            y=text_y,
             height=16,
             width=64,
             font_size=16,
@@ -171,7 +156,7 @@ def draw_leave_instructions(
             ctx,
             text="SOON",
             x=x + 304,
-            y=y + 44,
+            y=text_y,
             height=16,
             width=64,
             font_size=16,
@@ -193,7 +178,60 @@ def find_next_train_times(times: List[int], min_minutes: int) -> List[int] | Non
             return [timestamp_to_minutes(time), timestamp_to_minutes(times[i + 1])]
     return None
 
+def draw_upcoming_train_time(ctx: cairo.Context, *, x: int, y: int, time: int | None) -> None:
+    """Draw the main train time display."""
+   
+    pencil.draw_rounded_rectangle(
+        ctx,
+        x=x + 92,
+        y=y + 52,
+        width=184,
+        height=92,
+        radius=8,
+        fill=colors.NEUTRAL_000,
+    )
+    
+    minutes_until = time if time is not None else "--"
+    pencil.draw_text(
+        ctx,
+        text=str(minutes_until),
+        x=x + 104,
+        y=y + 64,
+        height=68,
+        font_size=84,
+        color=colors.NEUTRAL_900,
+    )
+    pencil.draw_text(
+        ctx,
+        text="min.",
+        x=x + 232,
+        y=y + 88,
+        height=20,
+        font_size=16,
+        color=colors.NEUTRAL_900,
+    )
 
+def draw_train_time_details(ctx: cairo.Context, *, x: int, y: int, time: int | None, label: str) -> None:
+    pencil.draw_text(
+        ctx,
+        text=label,
+        x=x,
+        y=y,
+        height=16,
+        font_size=12,
+        color=colors.NEUTRAL_900,
+    )
+    minutes_until_next = time if time is not None else "--"
+    pencil.draw_text(
+        ctx,
+        text=str(minutes_until_next) + " min.",
+        x=x,
+        y=y + 18,
+        height=16,
+        font_size=16,
+        color=colors.NEUTRAL_900,
+    )
+ 
 # pylint: disable=too-many-arguments
 def draw_station(
     ctx: cairo.Context,
@@ -211,6 +249,7 @@ def draw_station(
     train_times = find_next_train_times(times["N"], walk_time)
     reverse_train_times = find_next_train_times(times["S"], walk_time)
 
+    pencil.draw_rounded_rectangle(ctx, x=x + 20, y=y + 28, width=48, height=116, radius=100, fill=colors.NEUTRAL_200)
     pencil.draw_circle(ctx, x=x + 20, y=y + 28, radius=24, fill=line["background"])
     pencil.draw_text(
         ctx,
@@ -230,87 +269,28 @@ def draw_station(
         draw_leave_instructions(ctx, x=x, y=y, leave=LeaveInstructions.SOON)
     else:
         draw_leave_instructions(ctx, x=x, y=y, leave=LeaveInstructions.NO_INSTRUCTIONS)
+    
     draw_station_status(ctx, x=x, y=y, status=status)
 
-    pencil.draw_rounded_rectangle(
-        ctx,
-        x=x + 92,
-        y=y + 124,
-        width=184,
-        height=92,
-        radius=8,
-        fill=colors.NEUTRAL_000,
-    )
+    # Draw station name
     pencil.draw_text(
         ctx,
         text=station,
         x=x + 92,
-        y=y + 100,
-        height=16,
-        font_size=16,
-        color=colors.NEUTRAL_900,
-    )
-    minutes_until = train_times[0] if train_times is not None else "--"
-    pencil.draw_text(
-        ctx,
-        text=str(minutes_until),
-        x=x + 104,
-        y=y + 136,
-        height=68,
-        font_size=84,
-        color=colors.NEUTRAL_900,
-    )
-    pencil.draw_text(
-        ctx,
-        text="min.",
-        x=x + 232,
-        y=y + 160,
-        height=20,
-        font_size=16,
-        color=colors.NEUTRAL_900,
-    )
-
-    pencil.draw_text(
-        ctx,
-        text="NEXT",
-        x=x + 300,
-        y=y + 122,
-        height=16,
-        font_size=12,
-        color=colors.NEUTRAL_900,
-    )
-    minutes_until_next = train_times[1] if train_times is not None else "--"
-    pencil.draw_text(
-        ctx,
-        text=str(minutes_until_next) + " min.",
-        x=x + 300,
-        y=y + 141,
+        y=y + 28,
         height=16,
         font_size=16,
         color=colors.NEUTRAL_900,
     )
 
-    pencil.draw_text(
-        ctx,
-        text=reverseDir,
-        x=x + 300,
-        y=y + 177,
-        height=16,
-        font_size=12,
-        color=colors.NEUTRAL_900,
-    )
-    minutes_until_reverse = (
-        reverse_train_times[0] if reverse_train_times is not None else "--"
-    )
-    pencil.draw_text(
-        ctx,
-        text=str(minutes_until_reverse) + " min.",
-        x=x + 300,
-        y=y + 196,
-        height=16,
-        font_size=16,
-        color=colors.NEUTRAL_900,
-    )
+    # Draw upcoming train time
+    draw_upcoming_train_time(ctx, x=x, y=y, time=train_times[0] if train_times is not None else None)
+
+    # Draw next train time details
+    draw_train_time_details(ctx, x=x + 300, y=y + 54, time=train_times[1] if train_times is not None else None, label="NEXT")
+
+    # Draw reverse train time details
+    draw_train_time_details(ctx, x=x + 300, y=y + 108, time=reverse_train_times[0] if reverse_train_times is not None else None, label=reverseDir)
 
 
 def generate_subway_time_image(
@@ -396,6 +376,11 @@ def generate_subway_time_image(
         },
         walk_time=8,
     )
+
+    pencil.draw_line(ctx, x1=20, y1=240, x2=376, y2=240, stroke=colors.NEUTRAL_200)
+    pencil.draw_line(ctx, x1=424, y1=240, x2=750, y2=240, stroke=colors.NEUTRAL_200)
+    pencil.draw_line(ctx, x1=400, y1=28, x2=400, y2=216, stroke=colors.NEUTRAL_200)
+    pencil.draw_line(ctx, x1=400, y1=264, x2=400, y2=456, stroke=colors.NEUTRAL_200)
 
     return surface
 

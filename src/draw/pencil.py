@@ -25,6 +25,22 @@ def draw_stroke_or_fill(
         ctx.stroke()
 
 
+
+def draw_line(
+    ctx: cairo.Context,
+    *,
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    stroke: Tuple[float, float, float] | None = None,
+) -> None:
+    """Draw a line."""
+    ctx.move_to(x1, y1)
+    ctx.line_to(x2, y2)
+    draw_stroke_or_fill(ctx, stroke=stroke)
+
+
 def draw_circle(
     ctx: cairo.Context,
     *,
