@@ -175,7 +175,10 @@ def find_next_train_times(times: List[int], min_minutes: int) -> List[int] | Non
     now = int(datetime.now().timestamp())
     for i, time in enumerate(times):
         if time > now + min_minutes * 60:
-            return [timestamp_to_minutes(time), timestamp_to_minutes(times[i + 1])]
+            next_times = [timestamp_to_minutes(time)]
+            if len(times) > i + 1:
+                next_times.append(timestamp_to_minutes(times[i + 1]))
+            return next_times
     return None
 
 def draw_upcoming_train_time(ctx: cairo.Context, *, x: int, y: int, time: int | None) -> None:
@@ -398,3 +401,4 @@ def create_subway_time_image(
 
     surface = generate_subway_time_image(times, alerts)
     surface.write_to_png(output_path)
+    surface.finish()
