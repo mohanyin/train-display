@@ -4,6 +4,7 @@ import sys
 
 import draw
 from subway_client import fetch_status_data, fetch_subway_times
+from display_connector import init, display_image
 
 
 def main() -> None:
@@ -12,12 +13,16 @@ def main() -> None:
         print("Usage: python main.py <output_path>")
         sys.exit(1)
 
+    init()
+
     times = fetch_subway_times()
     alerts = fetch_status_data()
 
     output_path = sys.argv[1]
     draw.create_subway_time_image(output_path, times, alerts)
     print(f"Subway time image saved to: {output_path}")
+
+    display_image()
 
 
 if __name__ == "__main__":

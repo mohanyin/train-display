@@ -12,15 +12,15 @@ def hex_to_rgb(hex_color: str) -> Tuple[float, float, float]:
     )
 
 
-SUBWAY_RED = hex_to_rgb("#EE352E")
-SUBWAY_ORANGE = hex_to_rgb("#FF6319")
-SUBWAY_YELLOW = hex_to_rgb("#FCCC0A")
+SUBWAY_RED = hex_to_rgb("#FF0000")
+SUBWAY_ORANGE = hex_to_rgb("#FF7F00")
+SUBWAY_YELLOW = hex_to_rgb("#FFFD01")
 
 NEUTRAL_000 = hex_to_rgb("#FFFFFF")
-NEUTRAL_100 = hex_to_rgb("#F8F3EF")
-NEUTRAL_200 = hex_to_rgb("#ECE4DE")
-NEUTRAL_300 = hex_to_rgb("#B6A99F")
+NEUTRAL_100 = hex_to_rgb("#F8F8F8")
+NEUTRAL_200 = hex_to_rgb("#ECECEC")
+NEUTRAL_300 = hex_to_rgb("#B6B6B6")
 NEUTRAL_900 = hex_to_rgb("#000000")
 
-STATUS_OK = hex_to_rgb("#34915A")
-STATUS_WARNING = hex_to_rgb("#E2B244")
+STATUS_OK = hex_to_rgb("#00BF00")
+STATUS_WARNING = hex_to_rgb("#FFFD01")
