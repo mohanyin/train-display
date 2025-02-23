@@ -7,9 +7,9 @@ logging.basicConfig(level=logging.DEBUG)
 epd = interface.EPD()
 
 def init():
-    logging.info("init and Clear")
+    logging.info("init and clear")
     epd.init()
-    epd.Clear()
+    epd.clear()
 
 def display_image(path):
     try:

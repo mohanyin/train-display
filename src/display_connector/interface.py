@@ -85,10 +85,8 @@ class EPD:
         epdconfig.digital_write(self.cs_pin, 1)
         
     def ReadBusyH(self):
-        logger.debug("e-Paper busy H")
         while(epdconfig.digital_read(self.busy_pin) == 0):      # 0: busy, 1: idle
             epdconfig.delay_ms(5)
-        logger.debug("e-Paper busy H release")
 
     def TurnOnDisplay(self):
         self.send_command(0x04) # POWER_ON
@@ -210,7 +208,7 @@ class EPD:
 
         self.TurnOnDisplay()
         
-    def Clear(self, color=0x11):
+    def clear(self, color=0x11):
         self.send_command(0x10)
         self.send_data2([color] * int(self.height) * int(self.width/2))
 
