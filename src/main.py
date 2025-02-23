@@ -4,31 +4,31 @@ import time
 import logging
 
 import draw
-from subway_client import fetch_status_data, fetch_subway_times
-from display_connector import init, display_image, cleanup
+import subway_client
+from display_connector import DisplayConnector
 
 logger = logging.getLogger(__name__)
+output_path = "outputs/output.png"
 
 
 def main() -> None:
-    """Process the command line arguments and create a black image."""
+    """Check subway times, generate image, and write to display"""
 
-    output_path = "outputs/output.png"
-
-    init()
+    display_connector = DisplayConnector()
+    display_connector.init()
 
     while True:
         try:
-            times = fetch_subway_times()
-            alerts = fetch_status_data()
+            times = subway_client.fetch_subway_times()
+            alerts = subway_client.fetch_status_data()
 
             draw.create_subway_time_image(output_path, times, alerts)
             logger.info(f"Subway time image saved to: {output_path}")
-            display_image(output_path)
+            display_connector.display_image(output_path)
 
             time.sleep(60)
         except KeyboardInterrupt:    
-            cleanup()
+            display_connector.cleanup()
             exit()
         except Exception as e:
             logger.warning(e)
